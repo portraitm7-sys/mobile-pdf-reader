@@ -117,22 +117,20 @@ class LibraryService {
       ),
     );
 
-    final sink = destination.openWrite();
-
     try {
-      await picked
-          .readAsByteStream()
-          .pipe(sink);
-    } catch (_) {
-      await sink.close();
+  final bytes = await picked.readAsBytes();
 
-      if (destination.existsSync()) {
-        await destination.delete();
-      }
+  await destination.writeAsBytes(
+    bytes,
+    flush: true,
+  );
+} catch (_) {
+  if (destination.existsSync()) {
+    await destination.delete();
+  }
 
-      rethrow;
+  rethrow;
     }
-
     final size =
         await destination.length();
 
